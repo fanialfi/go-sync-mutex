@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"runtime"
 	"sync"
+	"unsafe"
 )
 
 type counter struct {
+	sync.Mutex
 	val int
 }
 
 func (c *counter) Add(int) {
+	c.Lock()
 	c.val++
+	c.Unlock()
 }
 
 func (c *counter) Value() int {
@@ -25,6 +29,7 @@ func main() {
 		wg    sync.WaitGroup
 		meter counter
 	)
+	fmt.Printf("size of counter struct : %d\n", unsafe.Sizeof(meter))
 
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
@@ -40,4 +45,5 @@ func main() {
 
 	wg.Wait()
 	fmt.Println(meter.Value())
+	fmt.Printf("size of counter struct : %d\n", unsafe.Sizeof(meter))
 }
